@@ -8,9 +8,11 @@ This repository provides valuable insight into starting a bare-metal BL602 proje
 
 ## Features
 
-- Manually-written startup code
-- Interrupt vector table implementation using CLIC vectored mode
-- 2 Hz LED blinking via timer interrupt
+- Manually written start-up code  
+- Interrupt vector table implementation using CLIC vectored mode  
+- Printf via UART (115200 baud rate)  
+- 2 Hz LED blinking via timer interrupt  
+- Reversed bootROM ELF: The bootROM code was dumped via a debugger, converted from binary to ELF format, and enhanced with manually added symbols (such as _start, main, and ROM API function names) . 
 
 ## Application Details
 
@@ -21,9 +23,9 @@ The low-level boot process begins on Hart0 and performs the following steps:
 - Sets up both exception and interrupt vector tables using CLIC vectored mode
 - Enables interrupts
 - Sets up the runtime environment for C/C++
-- Jumps to the main() function and configures a timer interrupt at 2 Hz
+- Jumps to the main() function and configures uart and a timer interrupt at 2 Hz
 
-An LED connected to the IO4 pin toggles every 500 ms.
+An LED connected to the IO3 pin toggles every 500 ms.
 
 ## Building the Application
 

@@ -23,7 +23,7 @@ extern "C" {
 #define     __IOM    volatile            /*! Defines 'read / write' structure member permissions */
 
 /* =========================================================================================================================== */
-/* ================                                            CLIC                                           ================ */
+/* ================                                      CLIC Defines                                         ================ */
 /* =========================================================================================================================== */
 #define CLIC_CTRL_ADDR      0x02000000UL
 #define CLIC_MSIP           *(volatile uint32_t*)(CLIC_CTRL_ADDR + 0x0000UL)
@@ -37,6 +37,20 @@ extern "C" {
 #define CLIC_INTIE           ((volatile uint8_t*)(CLIC_HART0_ADDR + 0x400UL))
 #define CLIC_INTCFG          ((volatile uint8_t*)(CLIC_HART0_ADDR + 0x800UL))
 #define CLIC_CFG             *(volatile uint8_t*)(CLIC_HART0_ADDR + 0xc00UL)
+
+/* =========================================================================================================================== */
+/* ================                                   GPIO FUNC Defines                                       ================ */
+/* =========================================================================================================================== */
+#define GPIO_FUN_SDIO       1
+#define GPIO_FUN_FLASH      2
+#define GPIO_FUN_SPI        4
+#define GPIO_FUN_I2C        6
+#define GPIO_FUN_UART       7
+#define GPIO_FUN_PWM        8
+#define GPIO_FUN_EXT_PA     9
+#define GPIO_FUN_ANALOG     10
+#define GPIO_FUN_SWGPIO     11
+#define GPIO_FUN_JTAG       14
 
 /* =========================================================================================================================== */
 /* ================                                            glb                                            ================ */

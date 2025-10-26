@@ -198,15 +198,17 @@ SRC_FILES := $(SRC_DIR)/Appli/main.c            \
              $(SRC_DIR)/Startup/boot.s          \
              $(SRC_DIR)/Startup/intvect.c       \
              $(SRC_DIR)/Startup/Startup.c       \
+             $(SRC_DIR)/StdLib/printf/printf.c  \
              $(SRC_DIR)/StdLib/StdLib.c
 
 ############################################################################################
 # Include Paths
 ############################################################################################
-INC_FILES := $(SRC_DIR)                             \
-             $(SRC_DIR)/Appli                       \
-             $(SRC_DIR)/Mcal                        \
-             $(SRC_DIR)/Startup                     \
+INC_FILES := $(SRC_DIR)                        \
+             $(SRC_DIR)/Appli                  \
+             $(SRC_DIR)/Mcal                   \
+             $(SRC_DIR)/Startup                \
+             $(SRC_DIR)/StdLib/printf          \
              $(SRC_DIR)/StdLib
 
 ############################################################################################
