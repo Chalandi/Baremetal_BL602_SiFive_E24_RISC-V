@@ -21,6 +21,6 @@ jobs:
       - name: target-riscv64-unknown-elf
         run: |
           PATH=./riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-x86_64-linux-ubuntu14/bin:$PATH
-          bash cd ./Build
+          cd ./Build
           bash ./Rebuild.sh
 
