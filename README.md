@@ -1,5 +1,8 @@
 # Bare Metal BL602 Project
 
+[![Build Status](https://github.com/Chalandi/Baremetal_BL602_SiFive_E24_RISC-V/actions/workflows/Baremetal_BL602_SiFive_E24_RISC-V.yml/badge.svg)](https://github.com/Chalandi/Baremetal_BL602_SiFive_E24_RISC-V/actions)
+
+
 This repository contains a fully manually-written bare-metal project for the BL602 single-core RISC-V (SiFive E24), without using Bouffalo Lab's SDK.
 
 It features a clear and easy-to-understand implementation in C11 and assembly, with a build system based on GNU Make, making this project both fun and educational.
@@ -29,7 +32,7 @@ An LED connected to the IO3 pin toggles every 500 ms.
 
 ## Building the Application
 
-To build the project, you need to have the RISC-V GCC compiler (`riscv64-unknown-elf`) installed, with support for the SiFive E24 core.
+To build the project, you need to have the RISC-V GCC compiler (`riscv64-unknown-elf`) installed, with support for the SiFive E24 core (https://github.com/sifive/freedom-tools/releases).
 
 Run the following commands:
 
@@ -58,3 +61,7 @@ cd ./Build
 ```
 
 After flashing, set IO8 to low and reset the target to start the application's execution.
+
+## Continuous Integration
+
+CI runs on pushes and pull-requests with a simple build and result verification on `ubuntu-latest` using GitHub Actions.
