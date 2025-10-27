@@ -27,6 +27,11 @@ ERR_MSG_FORMATER_SCRIPT = $(CURDIR)/../Tools/scripts/CompilerErrorFormater.py
 LINKER_ERR_MSG_FORMATER_SCRIPT = $(CURDIR)/../Tools/scripts/LinkerErrorFormater.py
 FORMAT_LINKER_ERR =
 FLASH_TOOL = ../Tools/flasher/blflash
+BOUFFALO-CLI = ../Tools/bouffalo-cli/bouffalo-cli
+BOOT_HEADER_BIN = ../Tools/scripts/boot_header.bin
+SCRIPT_PATCH_BOOT_HEADER_SIZE = ../Tools/scripts/PatchImageBootHeader.py
+IMAGE_SIZE = $(shell stat -c%s $(OUTPUT_DIR)/$(PRJ_NAME).img)
+
 ############################################################################################
 # Toolchain
 ############################################################################################
@@ -326,13 +331,23 @@ GENERATE:
 	@$(OBJDUMP) -d --visualize-jumps --wide $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OUTPUT_DIR)/$(PRJ_NAME).dis
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).hex
 	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O ihex $(OUTPUT_DIR)/$(PRJ_NAME).hex
+	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).bin
+	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O binary $(OUTPUT_DIR)/$(PRJ_NAME).bin
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).img
-	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O binary $(OUTPUT_DIR)/$(PRJ_NAME).img
+	@-cat $(BOOT_HEADER_BIN) $(OUTPUT_DIR)/$(PRJ_NAME).bin > $(OUTPUT_DIR)/$(PRJ_NAME).img
+	@-$(PYTHON) $(SCRIPT_PATCH_BOOT_HEADER_SIZE) $(OUTPUT_DIR)/$(PRJ_NAME).img
 
 
 .PHONY : FLASH
 FLASH:
-	@-echo +++ flash: $(OUTPUT_DIR)/$(PRJ_NAME).img
-	$(FLASH_TOOL) flash $(realpath $(OUTPUT_DIR)/$(PRJ_NAME).img) --baud-rate 230400 --initial-baud-rate 230400 --port COM3 || true
+	@-echo +++ flash: $(realpath $(OUTPUT_DIR)/$(PRJ_NAME).img)
+#	$(FLASH_TOOL) flash $(realpath $(OUTPUT_DIR)/$(PRJ_NAME).bin) --baud-rate 230400 --initial-baud-rate 230400 --port COM3 || true
+	@-$(BOUFFALO-CLI) -p COM3 flash write $(realpath $(OUTPUT_DIR)/$(PRJ_NAME).img) 0 $(IMAGE_SIZE)
+	@-echo +++ End
+
+.PHONY : ERASE_ALL
+ERASE_ALL:
+	@-echo "+++ Erase all flash (2MB)"
+	@-$(BOUFFALO-CLI) -p COM3 flash erase 0 2097152
 	@-echo +++ End
 
