@@ -1,17 +1,17 @@
 /******************************************************************************************
   Filename    : Memory_Map.ld
   
-  Core        : RV32IMAC
+  Core        : RV32IMAFCB (SiFive E24 RISC-V)
   
-  MCU         : FE310-G002 (SiFive)
+  MCU         : BL602
     
   Author      : Chalandi Amine
  
   Owner       : Chalandi Amine
   
-  Date        : 04.06.2021
+  Date        : 21.10.2025
   
-  Description : Linker description file for FE310 SiFive
+  Description : Linker descriptor file
   
 ******************************************************************************************/
 
