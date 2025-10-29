@@ -102,7 +102,7 @@ void main(void)
 //-----------------------------------------------------------------------------------------
 void Isr_TIMER_Interrupt (void)
 {
-  /* toggle the IO4 pin */
+  /* toggle the IO3 pin */
   glb->GPIO_CFGCTL32.bit.reg_gpio_3_o ^= 1ul;
 
   /* set the timeout to 500ms */
