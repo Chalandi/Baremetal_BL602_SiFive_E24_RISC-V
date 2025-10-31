@@ -26,8 +26,8 @@ ENTRY(_start)
 __FLASH_START_ADDRESS = 0x23000000;
 __FLASH_SIZE          = 2M;
 
-__ITCM_START_ADDRESS = 0x22008000;
-__ITCM_SIZE          = 48K;
+__ITCM_START_ADDRESS = 0x22010000;
+__ITCM_SIZE          = 16K;
 
 __DTCM_START_ADDRESS = 0x42014000;
 __DTCM_SIZE          = 48K;
@@ -46,7 +46,7 @@ MEMORY
 {
   FLASH(rx)   : ORIGIN = __FLASH_START_ADDRESS, LENGTH = __FLASH_SIZE
   ITCM(rx)    : ORIGIN = __ITCM_START_ADDRESS,  LENGTH = __ITCM_SIZE
-  DTCM(rx)    : ORIGIN = __DTCM_START_ADDRESS,  LENGTH = __DTCM_SIZE
+  DTCM(rw)    : ORIGIN = __DTCM_START_ADDRESS,  LENGTH = __DTCM_SIZE
   STACK(rw)   : ORIGIN = __STACK_START_ADDRESS, LENGTH = __STACK_SIZE
   RAM(rwx)    : ORIGIN = __RAM_START_ADDRESS,   LENGTH = __RAM_SIZE
 }
@@ -64,6 +64,13 @@ SECTIONS
     *(.text)
     . = ALIGN(4);
   } > FLASH
+
+  .fast_interrupt : ALIGN(4)
+  {
+    PROVIDE(__FAST_INTERRUPT_BASE_ADDRESS = .);
+    *(.fast_interrupt)
+    . = ALIGN(4);
+  } > ITCM  AT>FLASH
 
   /* Read-only data (.rodata) */
   .rodata : ALIGN(4)
@@ -114,6 +121,7 @@ SECTIONS
     PROVIDE(__RUNTIME_COPY_TABLE = .) ;
     LONG(LOADADDR(.data));   LONG(0 + ADDR(.data));   LONG(SIZEOF(.data));
     LONG(LOADADDR(.sdata));  LONG(0 + ADDR(.sdata));  LONG(SIZEOF(.sdata));
+    LONG(LOADADDR(.fast_interrupt));  LONG(0 + ADDR(.fast_interrupt));  LONG(SIZEOF(.fast_interrupt));
     LONG(-1);                LONG(-1);                LONG(-1);
     . = ALIGN(4);
     PROVIDE(__CODE_END_ADDRESS = .);
