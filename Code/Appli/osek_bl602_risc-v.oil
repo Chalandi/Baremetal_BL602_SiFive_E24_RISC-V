@@ -1,0 +1,89 @@
+// OIL-Definition-File
+OIL_VERSION = "2.3";
+
+CPU SiFive_E24 {
+
+   OS MyOSEK {
+      MULTICORE = FLASE;
+      STARTUPHOOK = FLASE;
+      ERRORHOOK = FLASE;
+      SHUTDOWNHOOK = FLASE;
+      PRETASKHOOK = FLASE;
+      POSTTASKHOOK = FLASE;
+      WithStackCheck = TRUE;
+      SysTickClockFrequencyMHz = 10;
+      MaximumVectorEntries = 69;
+      TickTime = 1000;
+
+      CPU_CORE  SiFive_E24_0
+      {
+          CORE_PHYSICAL_ID = 0;
+          VENDOR = "SiFive";
+          CORE_TYPE = "E24";
+      };
+
+   };
+
+   TASK T1 {
+      CORE = 0;
+      TYPE = AUTO;
+      SCHEDULE = FULL;
+      PRIORITY = 2;
+      ACTIVATION = 1;
+      AUTOSTART = TRUE;
+      EVENT = EVT_TOGGLE_LED;
+      StackSize = 0x400;
+   };
+   
+   TASK T2 {
+      CORE = 0;
+      TYPE = AUTO;
+      SCHEDULE = FULL;
+      PRIORITY = 5;
+      ACTIVATION = 1;
+      AUTOSTART = TRUE;
+      EVENT = EVT_TOGGLE_LED_CYCLE;
+      StackSize = 0x400;
+   };
+
+   ALARM ALARM_TOGGLE_LED {
+      CORE = 0;
+      ACTION = SETEVENT
+      {
+         TASK = T1;
+         EVENT = EVT_TOGGLE_LED;
+      };
+      AUTOSTART = FALSE;
+   };
+
+   ALARM ALARM_TOGGLE_LED_WINDOW {
+      CORE = 0;
+      ACTION = SETEVENT
+      {
+         TASK = T2;
+         EVENT = EVT_TOGGLE_LED_CYCLE;
+      };
+      AUTOSTART = FALSE;
+   };
+
+   EVENT EVT_TOGGLE_LED {
+      MASK = AUTO;
+   };
+
+   EVENT EVT_TOGGLE_LED_CYCLE {
+      MASK = AUTO;
+   };
+
+   ISR SysTickTimer {
+      CORE  = 0;
+      CATEGORY = 2;
+      VectorAddress = 7;
+   };
+
+   ISR osDispatchHandler {
+      CORE  = 0;
+      CATEGORY = 1;
+      VectorAddress = 3;
+   };
+
+};

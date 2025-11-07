@@ -19,9 +19,7 @@ OUTPUT_DIR  = $(CURDIR)/../Output
 OBJ_DIR     = $(OUTPUT_DIR)/obj
 LD_SCRIPT   = $(SRC_DIR)/Memory_Map.ld
 SRC_DIR     = $(CURDIR)/../Code
-PEMICRO_DIR = $(CURDIR)/../Tools/pemicro/
-RTOS        = #osek
-CORE_FAMILY = E24
+
 PYTHON      = python
 ERR_MSG_FORMATER_SCRIPT = $(CURDIR)/../Tools/scripts/CompilerErrorFormater.py
 LINKER_ERR_MSG_FORMATER_SCRIPT = $(CURDIR)/../Tools/scripts/LinkerErrorFormater.py
@@ -32,14 +30,19 @@ BOOT_HEADER_BIN = ../Tools/scripts/boot_header.bin
 SCRIPT_PATCH_BOOT_HEADER_SIZE = ../Tools/scripts/PatchImageBootHeader.py
 IMAGE_SIZE = $(shell stat -c%s $(OUTPUT_DIR)/$(PRJ_NAME).img)
 
+
+RTOS           = osek
+
+LOCKDIR := $(OBJ_DIR)/err_formatter.lock
+
 ############################################################################################
 # Toolchain
 ############################################################################################
 TOOLCHAIN          = riscv64-unknown-elf
 
-ARCH               =  -mcpu=sifive-e24                               \
-                      -mabi=ilp32                                    \
-                      -msmall-data-limit=0                           \
+ARCH               =  -mcpu=sifive-e24       \
+                      -mabi=ilp32            \
+                      -msmall-data-limit=0   \
                       -falign-functions=4
 
 
@@ -220,9 +223,12 @@ INC_FILES := $(SRC_DIR)                        \
 # RTOS Files
 ############################################################################################
 ifeq ($(RTOS),osek)
- OS_OIL_FILE = $(SRC_DIR)/Appli/osek_bl602_risc-v.oil
+ OS_CORE_ARCH      = RISC-V
+ OS_BOARD_NAME     = Pinecone_BL602
+ OSEK_DIR          = $(SRC_DIR)/OSEK
+ OS_OIL_FILE       = $(SRC_DIR)/Appli/osek_bl602_risc-v.oil
  OS_TCB_GEN_FOLDER = $(SRC_DIR)/Appli/gen
- include $(SRC_DIR)/OSEK/Os.makefile
+ include $(OSEK_DIR)/Os.makefile
  SRC_FILES += $(SRC_DIR)/Appli/tasks.c
  SRC_FILES += $(OS_TCB_GEN_FOLDER)/OsTcb.c
  INC_FILES += $(OS_TCB_GEN_FOLDER)
@@ -287,37 +293,37 @@ CLEAN :
 $(OBJ_DIR)/%.o : %.c
 	@-echo +++ compile: $(subst \,/,$<) to $(subst \,/,$@)
 	@-$(CC) $(COPS) $(addprefix -I, $(INC_FILES)) -c $< -o $(OBJ_DIR)/$(basename $(@F)).o 2> $(OBJ_DIR)/$(basename $(@F)).err
-	@-$(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR
+	@-while ! mkdir $(LOCKDIR) 2>/dev/null; do sleep 0.1; done; $(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR; rmdir $(LOCKDIR)
 
 $(OBJ_DIR)/%.o : %.S
 	@-echo +++ compile: $(subst \,/,$<) to $(subst \,/,$@)
 	@-$(CC) $(OPT) $(ARCH) $(DEFS) $(addprefix -I, $(INC_FILES)) -c $< -o $(OBJ_DIR)/$(basename $(@F)).o 2> $(OBJ_DIR)/$(basename $(@F)).err
-	@-$(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR
+	@-while ! mkdir $(LOCKDIR) 2>/dev/null; do sleep 0.1; done; $(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR; rmdir $(LOCKDIR)
 
 ifeq ($(AS), $(TOOLCHAIN)-as)
 $(OBJ_DIR)/%.o : %.s
 	@-echo +++ compile: $(subst \,/,$<) to $(subst \,/,$@)
 	@$(AS) $(ASOPS) $< -o $(OBJ_DIR)/$(basename $(@F)).o 2> $(OBJ_DIR)/$(basename $(@F)).err >$(OBJ_DIR)/$(basename $(@F)).lst
-	@-$(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR
+	@-while ! mkdir $(LOCKDIR) 2>/dev/null; do sleep 0.1; done; $(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR; rmdir $(LOCKDIR)
 else
 $(OBJ_DIR)/%.o : %.s
 	@-echo +++ compile: $(subst \,/,$<) to $(subst \,/,$@)
 	@-$(CC) $(ASOPS) $(addprefix -I, $(INC_FILES)) -c $< -o $(OBJ_DIR)/$(basename $(@F)).o 2> $(OBJ_DIR)/$(basename $(@F)).err
-	@-$(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR
+	@-while ! mkdir $(LOCKDIR) 2>/dev/null; do sleep 0.1; done; $(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR; rmdir $(LOCKDIR)
 endif
 
 $(OBJ_DIR)/%.o : %.cpp
 	@-echo +++ compile: $(subst \,/,$<) to $(subst \,/,$@)
 	@$(CPP) $(CPPOPS) $(addprefix -I, $(INC_FILES)) -c $< -o $(OBJ_DIR)/$(basename $(@F)).o 2> $(OBJ_DIR)/$(basename $(@F)).err
-	@-$(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR
+	@-while ! mkdir $(LOCKDIR) 2>/dev/null; do sleep 0.1; done; $(PYTHON) $(ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR; rmdir $(LOCKDIR)
 
 $(OUTPUT_DIR)/$(PRJ_NAME).elf : $(FILES_O) $(LD_SCRIPT)
 	@-echo +++ link: $(subst \,/,$@)
 ifeq ($(FORMAT_LINKER_ERR), )
 	@$(LD) $(LOPS) $(FILES_O) $(EXTERNAL_LIB) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf 2>&1
 else
-	@$(LD) $(LOPS) $(FILES_O) $(EXTERNAL_LIB) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf 2> $(OBJ_DIR)/linker.err || true
-	@-$(PYTHON) $(LINKER_ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/linker.err
+	@$(LD) $(LOPS) $(FILES_O) $(EXTERNAL_LIB) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OBJ_DIR)/linker.err 2>&1 || true
+	$(PYTHON) $(LINKER_ERR_MSG_FORMATER_SCRIPT) $(OBJ_DIR)/linker.err
 endif
 
 .PHONY : GENERATE
@@ -325,10 +331,11 @@ GENERATE:
 	@$(if $(wildcard $(OUTPUT_DIR)/$(PRJ_NAME).elf), ,$(error Error: Link not succeeded !))
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@$(READELF) -WhS $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OUTPUT_DIR)/$(PRJ_NAME).readelf
+	@-cat $(OUTPUT_DIR)/$(PRJ_NAME).map >> $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).sym
-	@$(READELF) -Ws $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OUTPUT_DIR)/$(PRJ_NAME).sym
+	@$(READELF) -Ws $(OUTPUT_DIR)/$(PRJ_NAME).elf >> $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).dis
-	@$(OBJDUMP) -d --visualize-jumps --wide $(OUTPUT_DIR)/$(PRJ_NAME).elf > $(OUTPUT_DIR)/$(PRJ_NAME).dis
+	@$(OBJDUMP) -d --visualize-jumps --wide $(OUTPUT_DIR)/$(PRJ_NAME).elf >> $(OUTPUT_DIR)/$(PRJ_NAME).readelf
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).hex
 	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O ihex $(OUTPUT_DIR)/$(PRJ_NAME).hex
 	@-echo +++ generate: $(OUTPUT_DIR)/$(PRJ_NAME).bin

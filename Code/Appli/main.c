@@ -22,6 +22,7 @@
 #include "BL602.h"
 #include "riscv-csr.h"
 #include "printf.h"
+#include "OsAPIs.h"
 
 //-----------------------------------------------------------------------------------------
 // Defines
@@ -57,14 +58,18 @@ void main(void)
   glb->GPIO_CFGCTL1.bit.reg_gpio_3_smt      = 0ul;
   glb->GPIO_CFGCTL34.bit.reg_gpio_3_oe      = 1ul;
 
+#if 0
   /* enabled selective hardware vectoring */
   CLIC_CFG |= 1ul;
 
   /* enable timer interrupt in CLIC vectored mode */
   CLIC_INTIE[7] = 1u;
+  CLIC_INTIE[3] = 1u;
+
 
   /* set the timeout to 500ms */
   CLIC_MTIMECMP = (uint64_t)(CLIC_MTIME + TIMEOUT_500MS);
+#endif
 
   /* configure gpio function for uart tx and rx */
   glb->GPIO_CFGCTL8.bit.reg_gpio_16_func_sel = GPIO_FUN_UART;
@@ -88,6 +93,9 @@ void main(void)
 
   /* output a text message on the uart console */
   printf("BareMetal BL602 SW is Alive!\n\r");
+
+  /* start the OS */
+  OS_StartOS(APP_MODE_DEFAULT);
 
   /* endless loop */
   while(1);
